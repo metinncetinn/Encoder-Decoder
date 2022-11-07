@@ -1,0 +1,112 @@
+using System;
+using System.Text;
+using System.Web;
+
+namespace EncodeDecode
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            sifreleme1 sezar = new sifreleme1();
+            sifreleme2 xor = new sifreleme2();
+
+            Console.WriteLine("Şifrelenecek metni giriniz...");
+
+            string şifrelenecekmetin = Console.ReadLine();
+            Console.WriteLine("\nŞifrelenmemiş metin: " + şifrelenecekmetin);
+            Console.WriteLine("\n\nXOR Şifrelemesi");
+            string xor_sifrelenmisYazi = xor.encode(şifrelenecekmetin);
+            string xor_cozulenYazi = xor.decode(xor_sifrelenmisYazi);
+            Console.WriteLine("\nSifrelenmis Yazi : " + xor_sifrelenmisYazi);
+            Console.WriteLine("\nCozulen Yazi : " + xor_cozulenYazi);
+            
+            string sezar_sifrelenmisYazi = sezar.encode(şifrelenecekmetin);
+            Console.WriteLine("\n\nSezar Şifrelemesi");
+            string sezar_cozulenYazi = sezar.decode(sezar_sifrelenmisYazi);
+            Console.WriteLine("\nSifrelenmis Yazi : " + sezar_sifrelenmisYazi);
+            Console.WriteLine("\nCozulen Yazi : " + sezar_cozulenYazi);
+
+        }
+    }
+    public interface ICipher
+    {
+        string encode(string str);
+        string decode(string str);
+    }
+    public class sifreleme1 : ICipher
+    {
+
+        string şifresiçözülmüş = "", şifrelenmiş = "";
+        string[] alfabe = {" ", "a", "b", "c", "ç", "d", "e", "f", "g", "ğ", "h", "ı", "i", "j", "k", "l", "m", "n", "o", "ö", "p", "r", "s", "ş", "t", "u", "ü", "v", "y", "z", "q", "x","w","A","B", "C", "Ç", "D", "E", "F", "G", "Ğ", "H", "I", "İ", "J", "K", "L", "M", "N", "O", "Ö", "P", "R", "S", "Ş", "T", "U", "Ü", "V", "Y", "Z", "Q", "X","W"};
+        string[] sifrelialfabe = {" ", "b", "c", "ç", "d", "e", "f", "g", "ğ", "h", "ı", "i", "j", "k", "l", "m", "n", "o", "ö", "p", "r", "s", "ş", "t", "u", "ü", "v", "y", "z", "q", "x", "w","a","B", "C", "Ç", "D", "E", "F", "G", "Ğ", "H", "I", "İ", "J", "K", "L", "M", "N", "O", "Ö", "P", "R", "S", "Ş", "T", "U", "Ü", "V", "Y", "Z", "Q", "X", "W","A"};
+
+        public string encode(string text1)
+        {
+            for (int x = 0; x < text1.Length; x++)
+            {
+                for (int y = 0; y < alfabe.Length; y++)
+                {
+                    if (text1[x].ToString() == alfabe[y])
+                    {
+                        şifrelenmiş += sifrelialfabe[y];
+                    }
+                }
+
+            }
+            return şifrelenmiş;
+        }
+
+        public string decode(string text2)
+        {
+            for (int x = 0; x < text2.Length; x++)
+            {
+                for (int y = 0; y < sifrelialfabe.Length; y++)
+                {
+                    if (text2[x].ToString() == sifrelialfabe[y])
+                    {
+                        şifresiçözülmüş += alfabe[y];
+                    }
+                }
+
+            }
+            
+            return şifresiçözülmüş;
+        }
+    }
+    class sifreleme2 : ICipher
+    {
+        public string encode(string str)
+        {
+            string key = "key";
+            byte[] decodedText = Encoding.UTF8.GetBytes(str);
+            byte[] encodedText = new byte[decodedText.Length];
+
+            for (int x = 0; x < decodedText.Length; x++)
+            {
+                encodedText[x] = (byte)(decodedText[x] ^ key[x % key.Length]);
+            }
+            string sifre = System.Convert.ToBase64String(encodedText);
+
+            return sifre;
+        }
+
+        public string decode(string str)
+        {
+            string key = "key";
+            var decodedText = System.Convert.FromBase64String(HttpUtility.UrlDecode(str));
+
+            byte[] sonuc = new byte[decodedText.Length];
+
+            for (int x = 0; x < decodedText.Length; x++)
+            {
+                sonuc[x] = (byte)((uint)decodedText[x] ^ (uint)key[x % key.Length]);
+            }
+            string sifre = Encoding.UTF8.GetString(sonuc);
+
+            return sifre;
+        }
+
+    }
+
+}
